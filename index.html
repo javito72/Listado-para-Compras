@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Compras Inteligente</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="theme-controls">
+            <button class="theme-toggle" onclick="toggleDarkMode()" title="Cambiar modo">🌙</button>
+            <div class="color-picker">
+                <div class="color-option color-blue active" data-theme="blue" onclick="setColorTheme('blue')" title="Azul"></div>
+                <div class="color-option color-green" data-theme="green" onclick="setColorTheme('green')" title="Verde"></div>
+                <div class="color-option color-purple" data-theme="purple" onclick="setColorTheme('purple')" title="Púrpura"></div>
+                <div class="color-option color-orange" data-theme="orange" onclick="setColorTheme('orange')" title="Naranja"></div>
+                <div class="color-option color-pink" data-theme="pink" onclick="setColorTheme('pink')" title="Rosa"></div>
+                <div class="color-option color-teal" data-theme="teal" onclick="setColorTheme('teal')" title="Verde azulado"></div>
+            </div>
+        </div>
+
+        <div class="cart-icon">🛒</div>
+        <h1>Lista de Compras Inteligente</h1>
+        <p class="subtitle">Organiza tus compras por categorías y no vuelvas a dar vueltas innecesarias por el supermercado</p>
+        <div id="app"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
