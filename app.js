@@ -102,8 +102,8 @@ function mostrarMenuPrincipal() {
     buttonGroup.appendChild(btnSi);
 
     if (hayElementosEnLista()) {
-        const btnEliminar = crearBoton('🗑️ Eliminar elemento', ['delete-button'], 'iniciarEliminarElemento');
-        buttonGroup.appendChild(btnEliminar);
+        const btnEliminar = crearBoton('🗑️ Eliminar elemento', ['delete-button'], 'iniciarEliminarElemento'); // La dejaremos por ahora.
+        // buttonGroup.appendChild(btnEliminar); // No lo agregamos aquí por ahora, ya que se eliminará desde la lista.
     }
 
     buttonGroup.appendChild(btnNo);
@@ -213,11 +213,11 @@ function agregarElemento(nombre, categoria) {
     buttonGroup.className = 'button-group';
 
     const btnSi = crearBoton('Sí', [], 'iniciarAgregarElemento');
-    const btnEliminar = crearBoton('🗑️ Eliminar elemento', ['delete-button'], 'iniciarEliminarElemento');
+    // const btnEliminar = crearBoton('🗑️ Eliminar elemento', ['delete-button'], 'iniciarEliminarElemento'); // Se eliminará desde la lista.
     const btnNo = crearBoton('Mostrar lista', ['no-button'], 'mostrarLista');
 
     buttonGroup.appendChild(btnSi);
-    buttonGroup.appendChild(btnEliminar);
+    // buttonGroup.appendChild(btnEliminar);
     buttonGroup.appendChild(btnNo);
 
     questionSection.appendChild(successMessage);
@@ -253,6 +253,14 @@ function mostrarLista() {
         const btnAdd = crearBoton('➕ Agregar', ['category-add-btn'], 'agregarDirectoACategoria');
         btnAdd.dataset.categoria = categoriaKey;
         btnAdd.title = `Agregar elemento a esta categoría`;
+        // Listener para agregar directo a la categoría
+        btnAdd.addEventListener('click', () => {
+            const nombreAlimento = prompt(`¿Qué deseas agregar a ${categoriaLabels[categoriaKey]}?`);
+            if (nombreAlimento) {
+                agregarElemento(nombreAlimento.trim(), categoriaKey);
+            }
+        });
+
 
         categoryHeader.appendChild(categoryName);
         categoryHeader.appendChild(btnAdd);
@@ -295,7 +303,7 @@ function mostrarLista() {
     finalButtonGroup.style.marginTop = '20px';
 
     const btnAgregarMas = crearBoton('➕ Agregar más elementos', [], 'iniciarAgregarElemento');
-    const btnAgregarRubro = crearBoton('✨ Agregar más Rubros', ['add-rubro-button'], 'mostrarFormularioNuevoRubro');
+    const btnAgregarRubro = crearBoton('✨ Agregar más Rubros', ['add-rubro-button'], 'mostrarFormularioNuevoRubro'); // Añadir funcionalidad después
     const btnReiniciar = crearBoton('🔄 Nueva Lista', ['reset-button'], 'reiniciarLista');
 
     finalButtonGroup.appendChild(btnAgregarMas);
@@ -331,16 +339,24 @@ app.addEventListener('click', (e) => {
             mostrarLista();
             break;
         case 'interactuarConElemento':
-            // Esta función crea su propio overlay, así que no se maneja aquí.
-            // La dejamos como estaba porque no actúa sobre #app.
             const { elemento, categoria: cat } = e.target.dataset;
             interactuarConElemento(elemento, cat);
             break;
         case 'reiniciarLista':
-            // Similar al anterior, abre un diálogo.
             reiniciarLista();
             break;
-        // Agrega aquí más casos para otras acciones que ocurran dentro de #app
+        case 'mostrarFormularioNuevoRubro':
+            mostrarFormularioNuevoRubro();
+            break;
+        case 'agregarNuevoRubro':
+            const nuevoRubroNombre = document.getElementById('nuevoRubroNombre').value.trim();
+            const nuevoRubroEtiqueta = document.getElementById('nuevoRubroEtiqueta').value.trim();
+            if (nuevoRubroNombre && nuevoRubroEtiqueta) {
+                agregarNuevoRubro(nuevoRubroNombre, nuevoRubroEtiqueta);
+            } else {
+                alert('Por favor, ingresa el nombre y la etiqueta del nuevo rubro.');
+            }
+            break;
     }
 });
 
@@ -391,15 +407,108 @@ document.querySelectorAll('.color-option').forEach(option => {
 
 
 // ===================================================================================
-// FUNCIONES DE DIÁLOGOS Y OVERLAYS (Se mantienen casi igual)
+// FUNCIONES DE DIÁLOGOS Y OVERLAYS
 // ===================================================================================
-// NOTA: Estas funciones crean sus propios overlays y los añaden al 'body',
-// por lo que su lógica de eventos interna puede permanecer como está por ahora,
-// aunque idealmente también se refactorizaría.
 
 function interactuarConElemento(elemento, categoria) {
-    // ... (Esta función y las de los diálogos se mantienen como estaban)
-    // ... (ya que usan `document.createElement` y se añaden al body)
+    const overlay = document.createElement('div');
+    overlay.className = 'custom-confirm-overlay';
+
+    overlay.innerHTML = `
+        <div class="custom-confirm-dialog">
+            <div class="custom-confirm-icon">✏️</div>
+            <div class="custom-confirm-title">¿Qué deseas hacer con este elemento?</div>
+            <div class="custom-confirm-message interaction-message">
+                <span class="custom-confirm-element">${elemento}</span>
+                de la categoría
+                <span class="custom-confirm-element">${categoriaLabels[categoria]}</span>
+            </div>
+            <div class="custom-confirm-buttons">
+                <button class="confirm-btn-edit" data-action="editar-item">✏️ Editar</button>
+                <button class="confirm-btn-yes" data-action="eliminar-item">🗑️ Eliminar</button>
+                <button class="confirm-btn-no" data-action="cancelar-accion">❌ Cancelar</button>
+            </div>
+        </div>
+    `;
+
+    const dialog = overlay.querySelector('.custom-confirm-dialog');
+    const interactionMessage = overlay.querySelector('.interaction-message');
+    const buttonsContainer = overlay.querySelector('.custom-confirm-buttons');
+
+    overlay.querySelector('.confirm-btn-edit').addEventListener('click', () => {
+        // Limpiar el mensaje y mostrar el input para editar
+        interactionMessage.innerHTML = `
+            <div class="edit-input-group">
+                <input type="text" id="editItemInput" value="${elemento}" class="edit-item-input">
+            </div>
+        `;
+        const editItemInput = overlay.querySelector('#editItemInput');
+        editItemInput.focus();
+
+        // Ocultar los botones originales y mostrar solo el de guardar y cancelar
+        buttonsContainer.innerHTML = ''; // Limpiar botones anteriores
+        
+        const btnGuardar = crearBoton('✔️ Guardar', ['confirm-btn-save'], 'guardar-edicion');
+        btnGuardar.addEventListener('click', () => {
+            const nuevoNombre = editItemInput.value.trim();
+            if (nuevoNombre && nuevoNombre !== elemento) {
+                editarElemento(elemento, categoria, nuevoNombre);
+            }
+            body.removeChild(overlay);
+        });
+
+        const btnCancelar = crearBoton('❌ Cancelar', ['confirm-btn-no'], 'cancelar-edicion');
+        btnCancelar.addEventListener('click', () => {
+            body.removeChild(overlay);
+        });
+
+        buttonsContainer.appendChild(btnGuardar);
+        buttonsContainer.appendChild(btnCancelar);
+
+        editItemInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                btnGuardar.click();
+            }
+        });
+    });
+
+    overlay.querySelector('.confirm-btn-yes').addEventListener('click', () => {
+        mostrarConfirmacionPersonalizada(
+            `¿Estás seguro de que deseas eliminar "${elemento}"?`,
+            elemento,
+            categoria,
+            (confirmado) => {
+                if (confirmado) {
+                    eliminarElemento(elemento, categoria);
+                }
+            }
+        );
+        body.removeChild(overlay);
+    });
+    
+    overlay.querySelector('.confirm-btn-no').addEventListener('click', () => {
+        body.removeChild(overlay);
+    });
+
+    body.appendChild(overlay);
+}
+
+function editarElemento(elementoAntiguo, categoria, nuevoNombre) {
+    const index = listaCompras[categoria].indexOf(elementoAntiguo);
+    if (index > -1) {
+        listaCompras[categoria][index] = nuevoNombre;
+        guardarDatos();
+        mostrarLista();
+    }
+}
+
+function eliminarElemento(elemento, categoria) {
+    const index = listaCompras[categoria].indexOf(elemento);
+    if (index > -1) {
+        listaCompras[categoria].splice(index, 1);
+        guardarDatos();
+        mostrarLista();
+    }
 }
 
 function reiniciarLista() {
@@ -411,7 +520,7 @@ function reiniciarLista() {
             if (confirmado) {
                 localStorage.removeItem('listaComprasInteligente');
                 localStorage.removeItem('listaComprasLabels');
-                cargarDatosGuardados();
+                cargarDatosGuardados(); // Recargar valores por defecto
                 mostrarMenuPrincipal();
             }
         }
@@ -446,6 +555,62 @@ function mostrarConfirmacionPersonalizada(mensaje, elemento, categoria, callback
     };
     
     body.appendChild(overlay);
+}
+
+function mostrarFormularioNuevoRubro() {
+    limpiarApp();
+
+    const questionSection = document.createElement('div');
+    questionSection.className = 'question-section';
+
+    const questionText = document.createElement('div');
+    questionText.className = 'question';
+    questionText.textContent = 'Agrega un nuevo rubro (categoría):';
+
+    const inputNombre = document.createElement('input');
+    inputNombre.type = 'text';
+    inputNombre.id = 'nuevoRubroNombre';
+    inputNombre.placeholder = 'Nombre del rubro (ej: Postres)';
+    inputNombre.className = 'input-full-width';
+    inputNombre.style.marginBottom = '10px';
+
+    const inputEtiqueta = document.createElement('input');
+    inputEtiqueta.type = 'text';
+    inputEtiqueta.id = 'nuevoRubroEtiqueta';
+    inputEtiqueta.placeholder = 'Etiqueta/Emoji (ej: 🍰 Postres)';
+    inputEtiqueta.className = 'input-full-width';
+    inputEtiqueta.style.marginBottom = '20px';
+
+
+    const buttonGroup = document.createElement('div');
+    buttonGroup.className = 'button-group';
+    buttonGroup.style.marginTop = '20px';
+    const btnAgregar = crearBoton('✔️ Agregar Rubro', ['add-rubro-button'], 'agregarNuevoRubro');
+    const btnCancelar = crearBoton('❌ Cancelar', ['no-button'], 'mostrarLista');
+
+    buttonGroup.appendChild(btnAgregar);
+    buttonGroup.appendChild(btnCancelar);
+
+    questionSection.appendChild(questionText);
+    questionSection.appendChild(inputNombre);
+    questionSection.appendChild(inputEtiqueta);
+    questionSection.appendChild(buttonGroup);
+    app.appendChild(questionSection);
+
+    inputNombre.focus();
+}
+
+function agregarNuevoRubro(nombre, etiqueta) {
+    const claveRubro = nombre.toLowerCase().replace(/ /g, ''); // Genera una clave simple
+    if (listaCompras[claveRubro]) {
+        alert('Este rubro ya existe. Por favor, elige un nombre diferente.');
+        return;
+    }
+    listaCompras[claveRubro] = [];
+    categoriaLabels[claveRubro] = etiqueta;
+    guardarDatos();
+    alert(`Rubro "${etiqueta}" agregado exitosamente.`);
+    mostrarLista();
 }
 
 

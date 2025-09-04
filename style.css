@@ -518,7 +518,7 @@ input::placeholder {
 }
 
 .confirm-btn-edit {
-    background: linear-gradient(145deg, #2c98d4, #1a719c);
+    background: linear-gradient(145deg, #2c98d4, #1a719c); /* Un color para editar */
     color: white;
     border: none;
     padding: 12px 30px;
@@ -530,6 +530,11 @@ input::placeholder {
     box-shadow: 0 4px 15px rgba(44, 152, 212, 0.4);
 }
 
+.confirm-btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(44, 152, 212, 0.6);
+}
+
 .custom-confirm-buttons {
     display: flex;
     gap: 15px;
@@ -537,7 +542,7 @@ input::placeholder {
     flex-wrap: wrap;
 }
 
-.confirm-btn-yes {
+.confirm-btn-yes { /* Usado para eliminar */
     background: linear-gradient(145deg, var(--secondary-color), var(--secondary-dark));
     color: white;
     border: none;
@@ -555,7 +560,7 @@ input::placeholder {
     box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
 }
 
-.confirm-btn-no {
+.confirm-btn-no { /* Usado para cancelar */
     background: linear-gradient(145deg, var(--primary-color), var(--primary-dark));
     color: white;
     border: none;
@@ -573,6 +578,52 @@ input::placeholder {
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
 }
 
+/* Estilos para el input de edición dentro del popup */
+.edit-input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.edit-item-input {
+    width: calc(100% - 20px); /* Ajusta el ancho para el padding */
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 1em;
+    text-align: center;
+    background: var(--category-bg);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.edit-item-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.confirm-btn-save {
+    background: linear-gradient(145deg, var(--success-color), var(--success-dark));
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+}
+
+.confirm-btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.6);
+}
+
+/* Animaciones */
 @keyframes fadeIn {
     to { opacity: 1; }
 }
@@ -604,8 +655,9 @@ input::placeholder {
     .clickable-item { padding: 7px 12px; }
     .custom-confirm-dialog { padding: 30px; }
     .custom-confirm-buttons { flex-direction: column; align-items: center; }
-    .confirm-btn-yes, .confirm-btn-no, .confirm-btn-edit { width: 100%; max-width: 200px; }
+    .confirm-btn-yes, .confirm-btn-no, .confirm-btn-edit, .confirm-btn-save { width: 100%; max-width: 200px; }
     .color-picker { justify-content: center; }
     .category-header { flex-direction: column; align-items: flex-start; gap: 15px; }
     .category-add-btn { margin-left: 0; align-self: flex-end; font-size: 1.1em; padding: 10px 20px; }
+    .edit-item-input { width: 100%; }
 }
